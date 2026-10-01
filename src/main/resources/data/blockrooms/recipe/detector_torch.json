@@ -1,0 +1,17 @@
+{
+    "type": "blockrooms:crafting_error",
+    "key": {
+        "#": "#c:rods/wooden",
+        "C": "minecraft:quartz",
+        "X": [ "minecraft:coal", "minecraft:charcoal" ]
+    },
+    "pattern": [
+        "C",
+        "X",
+        "#"
+    ],
+    "result": {
+        "count": 4,
+        "id": "blockrooms:detector_torch"
+    }
+}

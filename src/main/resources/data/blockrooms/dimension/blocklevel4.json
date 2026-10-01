@@ -1,0 +1,60 @@
+{
+  "type": "minecraft:overworld",
+  "generator": {
+    "type": "blockrooms:blocklevel4_generator",
+    "settings": "blockrooms:blocklevel4",
+    "biome_source": {
+      "type": "minecraft:multi_noise",
+      "biomes": [
+        {
+          "biome": "minecraft:plains",
+          "parameters": {
+            "temperature": 0.5,
+            "humidity": 0.2,
+            "continentalness": 0.5,
+            "erosion": 0.2,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "minecraft:forest",
+          "parameters": {
+            "temperature": 0.5,
+            "humidity": 0.6,
+            "continentalness": 0.5,
+            "erosion": 0.2,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "minecraft:birch_forest",
+          "parameters": {
+            "temperature": 0.5,
+            "humidity": 0.9,
+            "continentalness": 0.5,
+            "erosion": 0.2,
+            "weirdness": 0.0,
+            "depth": 0.0,
+            "offset": 0.0
+          }
+        },
+        {
+          "biome": "minecraft:river",
+          "parameters": {
+            "temperature": 0.5,
+            "humidity": 0.5,
+            "continentalness": -0.5,
+            "erosion": 0.2,
+            "weirdness": 0.0,
+            "depth": -0.5,
+            "offset": 0.0
+          }
+        }
+      ]
+    }
+  }
+}

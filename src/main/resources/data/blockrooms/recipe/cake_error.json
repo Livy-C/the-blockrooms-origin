@@ -1,0 +1,18 @@
+{
+    "type": "blockrooms:crafting_error",
+    "key": {
+        "A": "minecraft:milk_bucket",
+        "B": "minecraft:sugar",
+        "C": "minecraft:wheat",
+        "E": "#minecraft:eggs"
+    },
+    "pattern": [
+        "CCC",
+        "BEB",
+        "AAA"
+    ],
+    "result": {
+        "count": 1,
+        "id": "minecraft:cake"
+    }
+}

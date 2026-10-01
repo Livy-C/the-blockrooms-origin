@@ -1,0 +1,10 @@
+{
+    "replace": false,
+    "values": [
+        "blockrooms:ruby",
+        {
+            "id": "#forge:gems/ruby",
+            "required": false
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "category": "misc",
+    "key": {
+        "#": "#c:cobblestones/normal"
+    },
+    "pattern": [
+        "##",
+        "##"
+    ],
+    "result": {
+        "count": 1,
+        "id": "blockrooms:error_crafting_table"
+    },
+    "show_notification": false
+}

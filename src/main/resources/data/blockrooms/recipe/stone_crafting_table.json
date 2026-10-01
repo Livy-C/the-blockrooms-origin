@@ -1,0 +1,14 @@
+{
+    "type": "blockrooms:crafting_error",
+    "key": {
+        "#": "#c:cobblestones/normal"
+    },
+    "pattern": [
+        "##",
+        "##"
+    ],
+    "result": {
+        "count": 1,
+        "id": "blockrooms:stone_crafting_table"
+    }
+}

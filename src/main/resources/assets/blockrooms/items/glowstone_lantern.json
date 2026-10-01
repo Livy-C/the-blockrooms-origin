@@ -1,0 +1,14 @@
+{
+    "model": {
+        "type": "minecraft:condition",
+        "on_false": {
+            "type": "minecraft:model",
+            "model": "blockrooms:item/glowstone_lantern"
+        },
+        "on_true": {
+            "type": "minecraft:model",
+            "model": "blockrooms:item/glowstone_lantern_empty"
+        },
+        "property": "minecraft:broken"
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "type": "blockrooms:quartz_door",
+    "biomes": [
+        "blockrooms:blocklevel2"
+    ],
+    "spawn_overrides": {},
+    "step": "surface_structures",
+    "terrain_adaptation": "none"
+}

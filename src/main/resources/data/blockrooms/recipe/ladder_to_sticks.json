@@ -1,0 +1,11 @@
+{
+  "type": "blockrooms:crafting_error_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:ladder"
+  ],
+  "result": {
+    "count": 2,
+    "id": "minecraft:stick"
+  }
+}

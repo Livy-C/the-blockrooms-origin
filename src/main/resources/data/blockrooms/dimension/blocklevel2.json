@@ -1,0 +1,10 @@
+{
+    "type": "blockrooms:blocklevel2",
+    "generator": {
+        "type": "blockrooms:blocklevel2_generator",
+        "biome_source": {
+            "type": "minecraft:fixed",
+            "biome": "blockrooms:blocklevel2"
+        }
+    }
+}

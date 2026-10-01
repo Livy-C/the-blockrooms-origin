@@ -1,0 +1,34 @@
+{
+    "music.beginning": {
+        "sounds": [
+            {
+                "name": "blockrooms:music/menu/beginning",
+                "stream": true
+            },
+            {
+                "name": "music/menu/beginning_2",
+                "stream": true
+            }
+        ]
+    },
+    "music.blockrooms.blocklevel1": {
+        "sounds": [
+            {
+                "name": "music/game/clark",
+                "stream": true
+            },
+            {
+                "name": "music/game/living_mice",
+                "stream": true
+            }
+        ]
+    },
+    "music.blockrooms.blocklevel7": {
+        "sounds": [
+            {
+                "name": "music/game/water/dragon_fish",
+                "stream": true
+            }
+        ]
+    }
+}

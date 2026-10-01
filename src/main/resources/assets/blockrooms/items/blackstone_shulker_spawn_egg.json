@@ -1,0 +1,6 @@
+{
+    "model": {
+        "type": "minecraft:model",
+        "model": "blockrooms:item/blackstone_shulker_spawn_egg"
+    }
+}

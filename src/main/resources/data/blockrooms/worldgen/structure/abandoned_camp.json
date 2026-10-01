@@ -1,0 +1,9 @@
+{
+    "type": "blockrooms:abandoned_camp",
+    "biomes": [
+        "blockrooms:blocklevel1"
+    ],
+    "spawn_overrides": {},
+    "step": "surface_structures",
+    "terrain_adaptation": "none"
+}

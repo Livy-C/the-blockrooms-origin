@@ -1,0 +1,17 @@
+{
+    "sy":  5,
+    "spawn_overrides":  {
+
+                        },
+    "type":  "blockrooms:bl3_template",
+    "step":  "surface_structures",
+    "template":  "bl3_drive_dark2_notramcar",
+    "sx":  12,
+    "biomes":  [
+
+               ],
+    "salt":  1010,
+    "terrain_adaptation":  "none",
+    "y_offset":  0,
+    "sz":  5
+}

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "blockrooms:block/teleporter_block"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "lit=true": {
+            "model": "minecraft:block/torch"
+        },
+        "lit=false": {
+            "model": "blockrooms:block/faint_torch"
+        }
+    }
+}

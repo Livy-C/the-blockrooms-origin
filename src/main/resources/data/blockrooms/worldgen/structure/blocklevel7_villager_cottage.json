@@ -1,0 +1,7 @@
+{
+    "type": "blockrooms:blocklevel7_villager_cottage",
+    "biomes": "#minecraft:is_overworld",
+    "spawn_overrides": {},
+    "step": "surface_structures",
+    "terrain_adaptation": "none"
+}

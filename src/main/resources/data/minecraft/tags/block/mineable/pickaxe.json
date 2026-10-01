@@ -1,0 +1,10 @@
+{
+    "replace": false,
+    "values": [
+        "blockrooms:heated_iron_block",
+        "blockrooms:stone_crafting_table",
+        "blockrooms:processed_soft_cobblestone",
+        "blockrooms:soft_cobblestone",
+        "blockrooms:fallable_stone"
+    ]
+}

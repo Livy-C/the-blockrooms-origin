@@ -1,0 +1,6 @@
+{
+    "parent": "minecraft:item/handheld",
+    "textures": {
+        "layer0": "blockrooms:item/glowstone_lantern_empty"
+    }
+}

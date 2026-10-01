@@ -1,0 +1,7 @@
+{
+    "replace": false,
+    "values": [
+        "blockrooms:error_crafting_table",
+        "blockrooms:stone_crafting_table"
+    ]
+}

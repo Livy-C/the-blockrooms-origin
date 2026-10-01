@@ -1,0 +1,14 @@
+{
+    "structures": [
+        {
+            "structure": "blockrooms:quartz_beta_base",
+            "weight": 1
+        }
+    ],
+    "placement": {
+        "type": "minecraft:random_spread",
+        "spacing": 1,
+        "separation": 0,
+        "salt": 823471
+    }
+}

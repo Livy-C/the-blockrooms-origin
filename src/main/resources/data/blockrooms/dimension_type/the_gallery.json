@@ -1,0 +1,38 @@
+{
+    "ambient_light": 0.0,
+    "attributes": {
+        "minecraft:audio/background_music": {
+            "default": {
+                "max_delay": 24000,
+                "min_delay": 12000,
+                "sound": "blockrooms:music.beginning"
+            }
+        },
+        "minecraft:gameplay/bed_rule": {
+            "can_set_spawn": "never",
+            "can_sleep": "never",
+            "error_message": {
+                "translate": "block.minecraft.bed.no_sleep"
+            }
+        },
+        "minecraft:visual/fog_color": "#d9cfba",
+        "minecraft:visual/sky_color": "#d9cfba"
+    },
+    "coordinate_scale": 1.0,
+    "has_ceiling": true,
+    "has_fixed_time": true,
+    "has_ender_dragon_fight": false,
+    "has_skylight": true,
+    "height": 256,
+    "infiniburn": "#minecraft:infiniburn_overworld",
+    "logical_height": 256,
+    "min_y": 0,
+    "monster_spawn_block_light_limit": 0,
+    "monster_spawn_light_level": {
+        "type": "minecraft:uniform",
+        "max_inclusive": 15,
+        "min_inclusive": 0
+    },
+    "skybox": "none",
+    "timelines": "#minecraft:in_overworld"
+}

@@ -1,0 +1,17 @@
+{
+    "sy":  6,
+    "spawn_overrides":  {
+
+                        },
+    "type":  "blockrooms:bl3_template",
+    "step":  "surface_structures",
+    "template":  "bl3_music",
+    "sx":  9,
+    "biomes":  [
+
+               ],
+    "salt":  1023,
+    "terrain_adaptation":  "none",
+    "y_offset":  0,
+    "sz":  8
+}

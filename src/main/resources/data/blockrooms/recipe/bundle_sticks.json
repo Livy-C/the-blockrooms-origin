@@ -1,0 +1,19 @@
+{
+  "type": "blockrooms:crafting_error_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:string"
+  ],
+  "result": {
+    "count": 1,
+    "id": "blockrooms:stick_bundle"
+  }
+}

@@ -1,0 +1,16 @@
+{
+    "type": "blockrooms:crafting_error",
+    "key": {
+        "#": "#c:rods/wooden",
+        "X": "#c:strings"
+    },
+    "pattern": [
+        "XX",
+        "X#",
+        " #"
+    ],
+    "result": {
+        "count": 1,
+        "id": "blockrooms:string_axe"
+    }
+}

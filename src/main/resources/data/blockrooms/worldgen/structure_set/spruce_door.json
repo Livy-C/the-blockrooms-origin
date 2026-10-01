@@ -1,0 +1,15 @@
+{
+    "structures": [
+        {
+            "structure": "blockrooms:spruce_door",
+            "weight": 1
+        }
+    ],
+    "placement": {
+        "type": "minecraft:random_spread",
+        "spacing": 1,
+        "separation": 0,
+        "salt": 55219,
+        "locate_offset": [8, 1, 8]
+    }
+}

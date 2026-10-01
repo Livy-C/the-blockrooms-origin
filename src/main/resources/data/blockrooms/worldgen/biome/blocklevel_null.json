@@ -1,0 +1,78 @@
+{
+    "spawners":  {
+                     "underground_water_creature":  [
+
+                                                    ],
+                     "monster":  [
+
+                                 ],
+                     "water_ambient":  [
+
+                                       ],
+                     "creature":  [
+
+                                  ],
+                     "water_creature":  [
+
+                                        ],
+                     "ambient":  [
+
+                                 ],
+                     "axolotls":  [
+
+                                  ],
+                     "misc":  [
+
+                              ]
+                 },
+    "temperature":  0.5,
+    "carvers":  [
+
+                ],
+    "has_precipitation":  false,
+    "effects":  {
+                    "water_color":  "#000000"
+                },
+    "features":  [
+                     [
+
+                     ],
+                     [
+
+                     ],
+                     [
+
+                     ],
+                     [
+
+                     ],
+                     [
+
+                     ],
+                     [
+
+                     ],
+                     [
+
+                     ],
+                     [
+
+                     ],
+                     [
+
+                     ],
+                     [
+
+                     ],
+                     [
+
+                     ]
+                 ],
+    "spawn_costs":  {
+
+                    },
+    "attributes":  {
+                       "minecraft:visual/sky_color":  "#000000"
+                   },
+    "downfall":  0.5
+}

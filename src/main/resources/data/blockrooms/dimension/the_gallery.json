@@ -1,0 +1,10 @@
+{
+    "type": "blockrooms:the_gallery",
+    "generator": {
+        "type": "blockrooms:the_gallery_generator",
+        "biome_source": {
+            "type": "minecraft:fixed",
+            "biome": "blockrooms:the_gallery"
+        }
+    }
+}

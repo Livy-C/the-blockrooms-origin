@@ -1,0 +1,6 @@
+{
+    "parent": "minecraft:block/cube_all",
+    "textures": {
+        "all": "blockrooms:block/heated_iron_block"
+    }
+}

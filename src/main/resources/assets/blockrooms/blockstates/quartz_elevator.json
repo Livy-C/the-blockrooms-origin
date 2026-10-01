@@ -1,0 +1,7 @@
+{
+    "variants": {
+        "": {
+            "model": "blockrooms:block/quartz_elevator"
+        }
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "type": "blockrooms:crafting_error",
+    "key": {
+        "#": "#c:ender_pearls",
+        "X": "minecraft:chiseled_quartz_block"
+    },
+    "pattern": [
+        " # ",
+        "#X#",
+        " # "
+    ],
+    "result": {
+        "id": "blockrooms:quartz_elevator"
+    }
+}

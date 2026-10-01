@@ -1,0 +1,6 @@
+{
+    "model": {
+        "type": "minecraft:model",
+        "model": "blockrooms:block/stone_crafting_table"
+    }
+}

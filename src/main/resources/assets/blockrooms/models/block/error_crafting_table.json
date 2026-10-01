@@ -1,0 +1,12 @@
+{
+    "parent": "minecraft:block/cube",
+    "textures": {
+        "down": "minecraft:block/stone",
+        "east": "blockrooms:block/error_crafting_table_side",
+        "north": "blockrooms:block/error_crafting_table_front",
+        "particle": "blockrooms:block/error_crafting_table_front",
+        "south": "blockrooms:block/error_crafting_table_side",
+        "up": "blockrooms:block/error_crafting_table_top",
+        "west": "blockrooms:block/error_crafting_table_front"
+    }
+}

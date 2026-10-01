@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blockrooms:processed_soft_cobblestone"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "blockrooms:blocks/soft_cobblestone"
+}

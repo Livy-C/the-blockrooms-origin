@@ -1,0 +1,7 @@
+{
+    "variants": {
+        "": {
+            "model": "blockrooms:block/error_crafting_table"
+        }
+    }
+}

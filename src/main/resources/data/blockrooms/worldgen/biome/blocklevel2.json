@@ -1,0 +1,61 @@
+{
+    "attributes": {
+        "minecraft:visual/sky_color": "#2e2a26"
+    },
+    "carvers": [],
+    "downfall": 0.4,
+    "effects": {
+        "water_color": "#2e2a26"
+    },
+    "features": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+    ],
+    "has_precipitation": false,
+    "spawn_costs": {},
+    "spawners": {
+        "ambient": [],
+        "axolotls": [],
+        "creature": [],
+        "misc": [],
+        "monster": [
+            {
+                "type": "minecraft:zombie",
+                "maxCount": 4,
+                "minCount": 2,
+                "weight": 90
+            },
+            {
+                "type": "minecraft:skeleton",
+                "maxCount": 4,
+                "minCount": 2,
+                "weight": 60
+            },
+            {
+                "type": "minecraft:wither_skeleton",
+                "maxCount": 2,
+                "minCount": 1,
+                "weight": 30
+            },
+            {
+                "type": "minecraft:spider",
+                "maxCount": 3,
+                "minCount": 1,
+                "weight": 50
+            }
+        ],
+        "underground_water_creature": [],
+        "water_ambient": [],
+        "water_creature": []
+    },
+    "temperature": 0.6
+}
