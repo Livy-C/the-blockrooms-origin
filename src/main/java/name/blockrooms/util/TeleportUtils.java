@@ -75,7 +75,7 @@ public class TeleportUtils {
     static {
         STANDARD_TARGET.put(Level.OVERWORLD, pos -> new Vec3(pos.x(), 64, pos.z()));
         STANDARD_TARGET.put(Level.END, pos -> new Vec3(0, 4, 0));
-        STANDARD_TARGET.put(ModLevels.BLOCKLEVEL_0, pos -> new Vec3(pos.x(), 1, pos.z()));
+        STANDARD_TARGET.put(ModLevels.BLOCKLEVEL_0, pos -> new Vec3(pos.x(), 64 + 1, pos.z()));
         STANDARD_TARGET.put(ModLevels.BLOCKLEVEL_1, pos -> new Vec3(pos.x(), 1, pos.z()));
         STANDARD_TARGET.put(ModLevels.BLOCKLEVEL_2, pos -> new Vec3(pos.x(), 1, pos.z()));
         STANDARD_TARGET.put(ModLevels.BLOCKLEVEL_3, pos -> new Vec3(pos.x(), 1, pos.z()));

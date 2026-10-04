@@ -43,5 +43,9 @@
   "blockrooms.configuration.ruby_trans_time": "Ruby Transforming Time",
   "blockrooms.configuration.ruby_trans_time.tooltip": "The time required for emerald transform to blockrooms ruby (tick)",
   "blockrooms.configuration.trembling_chance": "Trembling Chance",
-  "blockrooms.configuration.trembling_chance.tooltip": "Chance (0-1, default 0.05) of gaining the Trembling effect when taking a result from the error crafting table."
+  "blockrooms.configuration.trembling_chance.tooltip": "Chance (0-1, default 0.05) of gaining the Trembling effect when taking a result from the error crafting table.",
+  "blockrooms.configuration.do_disable_pause_menu_button": "Do Disable Pause Menu Button",
+  "blockrooms.configuration.do_disable_pause_menu_button.tooltip": "Whether to disable buttons on pause menu when in the Blockrooms.",
+  "blockrooms.configuration.do_disable_mod_list_button": "Do Disable Mod List Button",
+  "blockrooms.configuration.do_disable_mod_list_button.tooltip": "Whether to disable the mod list button on pause menu when in the Blockrooms. (THINK TWICE BEFORE SWITCHING!)"
 }

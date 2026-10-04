@@ -29,12 +29,10 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
-import net.minecraft.world.level.levelgen.blending.Blender;
+
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.StreamSupport;
 
 public class BlockLevel0Generator extends SimpleGenerator {
@@ -69,24 +67,24 @@ public class BlockLevel0Generator extends SimpleGenerator {
                 int worldX = chunk.getPos().getMinBlockX() + x;
                 int worldZ = chunk.getPos().getMinBlockZ() + z;
 
-                for (int y = this.getMinY(); y <= this.getGenDepth(); y++) {
-                    if (y >= 0 && y <= 4) chunk.setBlockState(new BlockPos(x, y, z), Blocks.CAVE_AIR.defaultBlockState(), Block.UPDATE_NONE);
+                for (int y = this.getMinY(); y <= this.getMinY() + this.getGenDepth(); y++) {
+                    if (y >= 64 && y <= 64 + 4) chunk.setBlockState(new BlockPos(x, y, z), Blocks.CAVE_AIR.defaultBlockState(), Block.UPDATE_NONE);
                     else chunk.setBlockState(new BlockPos(x, y, z), Blocks.BEDROCK.defaultBlockState(), Block.UPDATE_NONE);
                 }
-                chunk.setBlockState(new BlockPos(x, 0, z), Blocks.OAK_PLANKS.defaultBlockState(), Block.UPDATE_NONE);
-                chunk.setBlockState(new BlockPos(x, 1, z), Blocks.CARPET.brown().defaultBlockState(), Block.UPDATE_NONE);
+                chunk.setBlockState(new BlockPos(x, 64, z), Blocks.OAK_PLANKS.defaultBlockState(), Block.UPDATE_NONE);
+                chunk.setBlockState(new BlockPos(x, 64 + 1, z), Blocks.CARPET.brown().defaultBlockState(), Block.UPDATE_NONE);
 
                 if ((worldX % 5 + 5) % 5 < 2 && (worldZ % 2 + 2) % 2 == 0) {
-                    chunk.setBlockState(new BlockPos(x, 5, z), Blocks.REDSTONE_LAMP.defaultBlockState().setValue(RedstoneLampBlock.LIT, true), Block.UPDATE_ALL);
-                    chunk.setBlockState(new BlockPos(x, 6, z), Blocks.REDSTONE_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+                    chunk.setBlockState(new BlockPos(x, 64 + 5, z), Blocks.REDSTONE_LAMP.defaultBlockState().setValue(RedstoneLampBlock.LIT, true), Block.UPDATE_ALL);
+                    chunk.setBlockState(new BlockPos(x, 64 + 6, z), Blocks.REDSTONE_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
                 }
                 else {
-                    chunk.setBlockState(new BlockPos(x, 5, z), Blocks.STONE.defaultBlockState(), Block.UPDATE_NONE);
+                    chunk.setBlockState(new BlockPos(x, 64 + 5, z), Blocks.STONE.defaultBlockState(), Block.UPDATE_NONE);
                 }
 
                 Random random = new Random(worldGenRegion.getSeed() ^ (worldX * 0x9e3779b97f4a7c15L) ^ (worldZ * 0xdefacedddeedbeefL));
                 if (random.nextDouble() <= 0.2) {
-                    for (int y = 1; y <= 4; y++) {
+                    for (int y = 64 + 1; y <= 64 + 4; y++) {
                         chunk.setBlockState(new BlockPos(x, y, z), Blocks.CHISELED_SANDSTONE.defaultBlockState(), Block.UPDATE_SUPPRESS_DROPS);
                     }
                 }
@@ -106,14 +104,14 @@ public class BlockLevel0Generator extends SimpleGenerator {
                 RandomSource randomSource = RandomSource.create(worldGenRegion.getSeed() ^ (worldX * 0x9e3779b97f4a7c15L) ^ (worldZ * 0xdefacedddeedbeefL));
                 Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(randomSource);
                 if (randomSource.nextDouble() <= 0.8) {
-                    placeOakExit(chunk, new BlockPos(x, 1, z), direction, worldGenRegion);
+                    placeOakExit(chunk, new BlockPos(x, 64 + 1, z), direction, worldGenRegion);
                 }
             }
         }
     }
 
     private static void placeOakExit(ChunkAccess chunk, BlockPos pos, Direction direction, WorldGenRegion worldGenRegion) {
-        for (int r = 0; r <= 4; r++) {
+        for (int r = 64; r <= 64 + 4; r++) {
             if (!chunk.getBlockState(pos.relative(direction, r)).isAir()) {
                 return;
             }
@@ -173,7 +171,7 @@ public class BlockLevel0Generator extends SimpleGenerator {
         Random random = new Random(seed ^ OUTPOST_SEED_XOR);
         int x = random.nextInt(STRUCTURE_RANGE * 2) - STRUCTURE_RANGE;
         int z = random.nextInt(STRUCTURE_RANGE * 2) - STRUCTURE_RANGE;
-        return new BlockPos(x, 2, z);
+        return new BlockPos(x, 64 + 2, z);
     }
 
     private static void applyVariantRegions(long seed, ChunkAccess chunk) {
@@ -189,15 +187,15 @@ public class BlockLevel0Generator extends SimpleGenerator {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 if (lampsOff) {
-                    BlockPos lampPos = new BlockPos(x, 5, z);
+                    BlockPos lampPos = new BlockPos(x, 64 + 5, z);
                     BlockState lamp = chunk.getBlockState(lampPos);
                     if (lamp.is(Blocks.REDSTONE_LAMP)) {
                         chunk.setBlockState(lampPos, lamp.setValue(RedstoneLampBlock.LIT, false), Block.UPDATE_CLIENTS);
-                        chunk.setBlockState(new BlockPos(x, 6, z), Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+                        chunk.setBlockState(new BlockPos(x, 64 + 6, z), Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
                     }
                 }
                 if (carpetGaps && random.nextDouble() < 0.25) {
-                    BlockPos carpetPos = new BlockPos(x, 1, z);
+                    BlockPos carpetPos = new BlockPos(x, 64 + 1, z);
                     if (chunk.getBlockState(carpetPos).is(Blocks.CARPET.brown())) {
                         chunk.setBlockState(carpetPos, Blocks.CAVE_AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                     }
@@ -212,10 +210,10 @@ public class BlockLevel0Generator extends SimpleGenerator {
                 for (int dz = 0; dz < 2; dz++) {
                     int bx = holeX + dx;
                     int bz = holeZ + dz;
-                    if (chunk.getBlockState(new BlockPos(bx, 5, bz)).is(Blocks.REDSTONE_LAMP)) {
-                        chunk.setBlockState(new BlockPos(bx, 6, bz), Blocks.CAVE_AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                    if (chunk.getBlockState(new BlockPos(bx, 64 + 5, bz)).is(Blocks.REDSTONE_LAMP)) {
+                        chunk.setBlockState(new BlockPos(bx, 64 + 6, bz), Blocks.CAVE_AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                     }
-                    chunk.setBlockState(new BlockPos(bx, 5, bz), Blocks.CAVE_AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+                    chunk.setBlockState(new BlockPos(bx, 64 + 5, bz), Blocks.CAVE_AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
                 }
             }
         }
@@ -234,7 +232,7 @@ public class BlockLevel0Generator extends SimpleGenerator {
         int minBlockX = chunk.getPos().getMinBlockX();
         int minBlockZ = chunk.getPos().getMinBlockZ();
 
-        for (int y = 2; y <= 3; y++) {
+        for (int y = 64 + 2; y <= 64 + 3; y++) {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     BlockPos pos = new BlockPos(x, y, z);

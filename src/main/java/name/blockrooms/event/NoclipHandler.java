@@ -7,14 +7,11 @@ import name.blockrooms.util.TeleportUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 @EventBusSubscriber
@@ -51,8 +48,5 @@ public class NoclipHandler {
                 new LevelWithChance(ModLevels.BLOCKLEVEL_0, 0.2));
         noclipMap.put(ModLevels.BLOCKLEVEL_0, ModBlocks.NOCLIP_POINT.get().defaultBlockState(),
                 new LevelWithChance(ModLevels.BLOCKLEVEL_1, 0.95));
-        // DEBUG
-        noclipMap.put(ModLevels.BLOCKLEVEL_4, Blocks.AMETHYST_BLOCK.defaultBlockState(),
-                new LevelWithChance(Level.NETHER, 0.9));
     }
 }

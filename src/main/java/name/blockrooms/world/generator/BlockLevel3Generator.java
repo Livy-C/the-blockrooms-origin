@@ -10,6 +10,7 @@ import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -51,6 +52,10 @@ public class BlockLevel3Generator extends SimpleGenerator {
         return CODEC;
     }
 
+    private int getMaxLayer() {
+        return 3; //(this.getGenDepth() - 1) / LAYER_HEIGHT;
+    }
+
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk) {
         for (int y = this.getMinY(); y < this.getMinY() + this.getGenDepth(); y++) {
@@ -61,14 +66,22 @@ public class BlockLevel3Generator extends SimpleGenerator {
             }
         }
 
-        int maxLayer = (this.getGenDepth() - 1) / LAYER_HEIGHT;
-        for (int layer = 0; layer <= maxLayer; layer++) {
-            var xRandom = randomState.getOrCreateRandomFactory(Identifier.fromNamespaceAndPath(Blockrooms.MODID, "edge_x"));
-            var zRandom = randomState.getOrCreateRandomFactory(Identifier.fromNamespaceAndPath(Blockrooms.MODID, "edge_z"));
-            this.generateLayer(chunk, layer, xRandom, zRandom);
+        for (int layer = 0; layer <= this.getMaxLayer(); layer++) {
+            this.generateLayer(chunk, layer, generateEdges(randomState, chunk, layer));
         }
 
         return CompletableFuture.completedFuture(chunk);
+    }
+
+    private static EdgeOpening generateEdges(RandomState randomState, ChunkAccess chunk, int layer) {
+        var xRandom = randomState.getOrCreateRandomFactory(Identifier.fromNamespaceAndPath(Blockrooms.MODID, "edge_x"));
+        var zRandom = randomState.getOrCreateRandomFactory(Identifier.fromNamespaceAndPath(Blockrooms.MODID, "edge_z"));
+        return new EdgeOpening(
+                edgeOpen(xRandom, chunk.getPos(), layer, Direction.EAST),
+                edgeOpen(xRandom, chunk.getPos(), layer, Direction.WEST),
+                edgeOpen(zRandom, chunk.getPos(), layer, Direction.SOUTH),
+                edgeOpen(zRandom, chunk.getPos(), layer, Direction.NORTH)
+        );
     }
 
     private static boolean edgeOpen(PositionalRandomFactory factory, ChunkPos chunkPos, int layer, Direction direction) {
@@ -80,18 +93,11 @@ public class BlockLevel3Generator extends SimpleGenerator {
         return factory.at(pos).nextDouble() < 0.55;
     }
 
-    private void generateLayer(ChunkAccess chunk, int layer, PositionalRandomFactory xRandom, PositionalRandomFactory zRandom) {
+    private void generateLayer(ChunkAccess chunk, int layer, EdgeOpening edges) {
         int baseY = this.getMinY() + layer * LAYER_HEIGHT;
 
-        EdgeOpening edges = new EdgeOpening(
-                edgeOpen(xRandom, chunk.getPos(), layer, Direction.EAST),
-                edgeOpen(xRandom, chunk.getPos(), layer, Direction.WEST),
-                edgeOpen(zRandom, chunk.getPos(), layer, Direction.SOUTH),
-                edgeOpen(zRandom, chunk.getPos(), layer, Direction.NORTH)
-        );
-
         this.generateTunnel(chunk, baseY, edges);
-        this.generateStructures(chunk, baseY, edges, false);
+        this.generateStructures(chunk, baseY, edges, true);
     }
 
     private void generateTunnel(ChunkAccess chunk, int baseY, EdgeOpening edges) {
@@ -140,43 +146,62 @@ public class BlockLevel3Generator extends SimpleGenerator {
             }
         }
 
-        for (int i = 0; i < 16; i++) {
-            if (edges.xTunnel()) {
-                if ((chunk.getPos().getMinBlockX() + i) % 5 == 0 &&
-                        (chunk.getBlockState(new BlockPos(i + 1, baseY + 1, TUNNEL_MIN)).isAir()
-                                && chunk.getBlockState(new BlockPos(i - 1, baseY + 1, TUNNEL_MIN)).isAir())) {
+        if (edges.xTunnel()) {
+            for (int x = Math.floorMod(-chunk.getPos().getMinBlockX(), 5) + 1; x < 16; x += 5) {
+                if (canPlacePlanks(x, edges, Direction.Axis.X)) {
                     for (int z = TUNNEL_MIN; z <= TUNNEL_MAX; z++) {
-                        chunk.setBlockState(new BlockPos(i, baseY + 3, z), PLANKS, Block.UPDATE_NONE);
+                        chunk.setBlockState(new BlockPos(x, baseY + 3, z), PLANKS, Block.UPDATE_NONE);
                     }
                     for (int y = 1; y <= 2; y++) {
-                        chunk.setBlockState(new BlockPos(i, baseY + y, TUNNEL_MIN), FENCE, Block.UPDATE_NONE);
-                        chunk.setBlockState(new BlockPos(i, baseY + y, TUNNEL_MAX), FENCE, Block.UPDATE_NONE);
+                        chunk.setBlockState(new BlockPos(x, baseY + y, TUNNEL_MIN), FENCE, Block.UPDATE_NONE);
+                        chunk.setBlockState(new BlockPos(x, baseY + y, TUNNEL_MAX), FENCE, Block.UPDATE_NONE);
                     }
-                    chunk.setBlockState(new BlockPos(i + 1, baseY + 3, (TUNNEL_MIN + TUNNEL_MAX) / 2),
+                    chunk.setBlockState(new BlockPos(x + 1, baseY + 3, (TUNNEL_MIN + TUNNEL_MAX) / 2),
                             TORCH.setValue(WallTorchBlock.FACING, Direction.EAST), Block.UPDATE_NONE);
                 }
             }
-            if (edges.zTunnel()) {
-                if ((chunk.getPos().getMinBlockZ() + i) % 5 == 0 &&
-                        (chunk.getBlockState(new BlockPos(TUNNEL_MIN, baseY + 1, i + 1)).isAir()
-                                && chunk.getBlockState(new BlockPos(TUNNEL_MIN, baseY + 1, i - 1)).isAir())) {
+        }
+        if (edges.zTunnel()) {
+            for (int z = Math.floorMod(-chunk.getPos().getMinBlockZ(), 5) + 1; z < 16; z += 5) {
+                if (canPlacePlanks(z, edges, Direction.Axis.Z)) {
                     for (int x = TUNNEL_MIN; x <= TUNNEL_MAX; x++) {
-                        chunk.setBlockState(new BlockPos(x, baseY + 3, i), PLANKS, Block.UPDATE_NONE);
+                        chunk.setBlockState(new BlockPos(x, baseY + 3, z), PLANKS, Block.UPDATE_NONE);
                     }
                     for (int y = 1; y <= 2; y++) {
-                        chunk.setBlockState(new BlockPos(TUNNEL_MIN, baseY + y, i), FENCE, Block.UPDATE_NONE);
-                        chunk.setBlockState(new BlockPos(TUNNEL_MAX, baseY + y, i), FENCE, Block.UPDATE_NONE);
+                        chunk.setBlockState(new BlockPos(TUNNEL_MIN, baseY + y, z), FENCE, Block.UPDATE_NONE);
+                        chunk.setBlockState(new BlockPos(TUNNEL_MAX, baseY + y, z), FENCE, Block.UPDATE_NONE);
                     }
-                    chunk.setBlockState(new BlockPos((TUNNEL_MIN + TUNNEL_MAX) / 2, baseY + 3, i + 1),
+                    chunk.setBlockState(new BlockPos((TUNNEL_MIN + TUNNEL_MAX) / 2, baseY + 3, z + 1),
                             TORCH.setValue(WallTorchBlock.FACING, Direction.SOUTH), Block.UPDATE_NONE);
                 }
             }
         }
     }
 
-    private boolean canPlacePlanks(int i, EdgeOpening edges, Direction direction) {
+    private boolean canPlacePlanks(int i, EdgeOpening edges, Direction.Axis axis) {
+        return !(edges.cross() && (i >= 6 && i <= 10)) &&
+                !(axis == Direction.Axis.X && (
+                        (!edges.west() && (i == 0 || i == 1)) ||
+                        (!edges.east() && (i == 14 || i == 15))
+                )) &&
+                !(axis == Direction.Axis.Z && (
+                        (!edges.north() && (i == 0 || i == 1)) ||
+                        (!edges.south() && (i == 14 || i == 15))
+                ));
+    }
 
-        return false;
+    @Override
+    public void applyCarvers(WorldGenRegion worldGenRegion, long seed, RandomState random, BiomeManager biomeManager, StructureManager structureManager, ChunkAccess chunk) {
+        for (int layer = 0; layer <= this.getMaxLayer(); layer++) {
+            EdgeOpening edges = generateEdges(random, chunk, layer);
+            this.placeOres(chunk, edges);
+        }
+
+        super.applyCarvers(worldGenRegion, seed, random, biomeManager, structureManager, chunk);
+    }
+
+    private void placeOres(ChunkAccess chunk, EdgeOpening edges) {
+
     }
 
     /* @Override

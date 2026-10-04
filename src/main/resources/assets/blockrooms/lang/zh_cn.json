@@ -43,5 +43,9 @@
   "blockrooms.configuration.ruby_trans_time": "块室红宝石同化时间",
   "blockrooms.configuration.ruby_trans_time.tooltip": "块室红宝石同化其周围的绿宝石所需要的时间（单位：游戏刻）",
   "blockrooms.configuration.trembling_chance": "合成失败诅咒概率",
-  "blockrooms.configuration.trembling_chance.tooltip": "从错误合成台取出合成产物时，触发合成失败诅咒效果的概率（0-1，默认 0.05）。"
+  "blockrooms.configuration.trembling_chance.tooltip": "从错误合成台取出合成产物时，触发合成失败诅咒效果的概率（0-1，默认 0.05）。",
+  "blockrooms.configuration.do_disable_pause_menu_button": "禁用暂停菜单按钮",
+  "blockrooms.configuration.do_disable_pause_menu_button.tooltip": "当玩家处于块室时是否禁用暂停菜单按钮。",
+  "blockrooms.configuration.do_disable_mod_list_button": "禁用模组列表按钮",
+  "blockrooms.configuration.do_disable_mod_list_button.tooltip": "当玩家处于块室时是否禁用模组列表按钮。（注意：开启这项设置会导致你无法正常退出游戏！）"
 }

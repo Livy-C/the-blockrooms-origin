@@ -1,7 +1,6 @@
 package name.blockrooms;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -19,6 +18,10 @@ public class Config {
             .defineInRange("ruby_trans_time", 60 * 20, 0, Integer.MAX_VALUE);
     public static final ModConfigSpec.DoubleValue TREMBLING_CHANCE = BUILDER
             .defineInRange("trembling_chance", 0.05, 0, 1);
+    public static final ModConfigSpec.BooleanValue DO_DISABLE_PAUSE_MENU_BUTTON = BUILDER
+            .define("do_disable_pause_menu_button", true);
+    public static final ModConfigSpec.BooleanValue DO_DISABLE_MOD_LIST_BUTTON = BUILDER
+            .define("do_disable_mod_list_button", false);
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
