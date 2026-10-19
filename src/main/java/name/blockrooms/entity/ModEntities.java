@@ -38,6 +38,7 @@ public class ModEntities {
             ENTITY_TYPES.register("blackstone_shulker", id ->
                     EntityType.Builder.of(BlackstoneShulker::new, MobCategory.MONSTER)
                             .sized(1.0F, 1.0F)
+                            .fireImmune()
                             .clientTrackingRange(10)
                             .build(entityId(id)));
 

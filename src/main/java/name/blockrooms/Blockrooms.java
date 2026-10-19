@@ -5,6 +5,7 @@ import name.blockrooms.block.ModBlocks;
 import name.blockrooms.block.entity.ModBlockEntities;
 import name.blockrooms.block.recipe.ModRecipeTypes;
 import name.blockrooms.effect.ModMobEffects;
+import name.blockrooms.entity.BlackstoneShulker;
 import name.blockrooms.entity.BloodZombie;
 import name.blockrooms.entity.EnhancedSkeleton;
 import name.blockrooms.entity.ModEntities;
@@ -16,7 +17,6 @@ import name.blockrooms.world.generator.ModGenerators;
 import name.blockrooms.world.structure.ModStructures;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -70,7 +70,7 @@ public class Blockrooms {
     private void registerEntityAttributes(EntityAttributeCreationEvent event) {
         event.put(ModEntities.BLOOD_ZOMBIE.get(), BloodZombie.createAttributes().build());
         event.put(ModEntities.SKELETON.get(), EnhancedSkeleton.createAttributes().build());
-        event.put(ModEntities.BLACKSTONE_SHULKER.get(), Shulker.createAttributes().build());
+        event.put(ModEntities.BLACKSTONE_SHULKER.get(), BlackstoneShulker.createAttributes().build());
     }
 
     @SubscribeEvent
