@@ -7,12 +7,13 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.network.chat.Component;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.gui.widget.ModsButton;
 
-@EventBusSubscriber
+@EventBusSubscriber(value = Dist.CLIENT)
 public class BlockroomsScreenHandler {
     private static final String BLOCKROOMS_TITLE = "Minecraft 1.ψ.5* | The Blockrooms";
     private static final Component RETURN_TO_GAME = Component.translatable("menu.returnToGame");

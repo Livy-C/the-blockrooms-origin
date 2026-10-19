@@ -5,13 +5,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Objects;
 
-@EventBusSubscriber
+@EventBusSubscriber(value = Dist.CLIENT)
 public class TremblingEffectHandler {
     private static final double MAX_OFFSET = 4.0;
 
