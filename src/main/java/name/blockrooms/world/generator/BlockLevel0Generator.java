@@ -111,7 +111,7 @@ public class BlockLevel0Generator extends SimpleGenerator {
     }
 
     private static void placeOakExit(ChunkAccess chunk, BlockPos pos, Direction direction, WorldGenRegion worldGenRegion) {
-        for (int r = 64; r <= 64 + 4; r++) {
+        for (int r = 0; r <= 4; r++) {
             if (!chunk.getBlockState(pos.relative(direction, r)).isAir()) {
                 return;
             }
@@ -134,16 +134,25 @@ public class BlockLevel0Generator extends SimpleGenerator {
                 Blocks.OAK_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER)
                         .setValue(DoorBlock.FACING, direction.getOpposite()), Block.UPDATE_NONE);
 
-        chunk.setBlockState(pos.relative(direction, 2).above(2),
-                Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, direction),
-                Block.UPDATE_NONE);
+        // 挂牌方块本身沿用区块内局部坐标（ChunkAccess 内部按 &15 回绕），
+        // 但挂牌 BE 需要的是真实世界坐标，否则 BE 会挂到别的区块的坐标上。
+        BlockPos signLocal = pos.relative(direction, 2).above(2);
+        BlockPos signWorld = new BlockPos(
+                chunk.getPos().getMinBlockX() + (signLocal.getX() & 15),
+                signLocal.getY(),
+                chunk.getPos().getMinBlockZ() + (signLocal.getZ() & 15));
+        BlockState signState = Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, direction);
+        chunk.setBlockState(signLocal, signState, Block.UPDATE_NONE);
 
         /*((SignBlockEntity) Objects.requireNonNull(worldGenRegion.getBlockEntity(pos.relative(direction, 2).above(2)))).setText(
                 new SignText(new Component[]{Component.literal("EXIT"), CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY},
                         new Component[]{CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY},
                         DyeColor.BLACK, false), true
         );*/
-        SignBlockEntity signBlockEntity = new SignBlockEntity(pos.relative(direction, 2).above(2), Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, direction));
+        // 必须用 WorldGenSignBlockEntity：setText 内部会 markUpdated → setChanged →
+        // Level.blockEntityChanged → getChunkAt(...) → ServerChunkCache.getChunk(...).join()，
+        // 在 worldgen 线程上等于强制等待区块变成 FULL，而"变成 FULL"正是当前这次生成要完成的事 → 死锁。
+        WorldGenSignBlockEntity signBlockEntity = new WorldGenSignBlockEntity(signWorld, signState);
         signBlockEntity.setLevel(worldGenRegion.getLevel());
         signBlockEntity.setText(
                 new SignText(new Component[]{Component.literal("EXIT"), CommonComponents.EMPTY, CommonComponents.EMPTY, CommonComponents.EMPTY},
@@ -260,6 +269,30 @@ public class BlockLevel0Generator extends SimpleGenerator {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * 世界生成阶段专用的挂牌方块实体：把 {@code setChanged()} 变成空操作。
+     *
+     * <p>{@link SignBlockEntity#setText} 内部会调用 {@code markUpdated()} → {@code setChanged()} →
+     * {@code Level.blockEntityChanged(pos)} → {@code getChunkAt(pos)} → {@code ServerChunkCache.getChunk(...).join()}。
+     * 这等于在世界生成工作线程上强制等待某个区块变成 FULL 状态；而如果那个区块正是"本项目前正在生成的区块"，
+     * 双方互等 → 世界生成永久卡死（服务器线程随后也一起卡住，客户端收不到区块，关窗口时看门狗报
+     * "Client shutdown from window close callback"）。项目在 {@code BlockLevel2DoorPiece} 的注释里
+     * 也警告过同类问题。</p>
+     *
+     * <p>标脏动作被吞掉没有副作用：区块是这次新生成的，本来就会写入存档（区块重新从磁盘加载后，
+     * 挂牌 BE 由原版工厂 {@code SignBlockEntity::new} 重建，恢复成普通挂牌）。</p>
+     */
+    private static final class WorldGenSignBlockEntity extends SignBlockEntity {
+        WorldGenSignBlockEntity(BlockPos pos, BlockState state) {
+            super(pos, state);
+        }
+
+        @Override
+        public void setChanged() {
+            // worldgen 阶段禁止标记脏块（会强制加载/等待区块 → 死锁）
         }
     }
 

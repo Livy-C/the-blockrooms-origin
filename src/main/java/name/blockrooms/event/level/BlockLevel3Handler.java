@@ -27,8 +27,12 @@ public class BlockLevel3Handler {
     public static void onBlockBreak(BreakBlockEvent event) {
         if (event.getPlayer().isCreative() || event.getPlayer().isSpectator()) return;
         if (shouldHandle(event.getLevel())) {
-            if (!event.getState().is(BlockTags.create(Identifier.fromNamespaceAndPath("c", "ores_in_ground/stone")))
-                || !event.getState().is(Blocks.REDSTONE_WIRE)) {
+            // 只放行"石头类矿石"和红石线；其余方块一律不能破坏（保护关卡结构）。
+            // 注意这里必须是 && ：用 || 的话对任何方块都恒为真，等于全面禁挖。
+            boolean isStoneOre = event.getState()
+                    .is(BlockTags.create(Identifier.fromNamespaceAndPath("c", "ores_in_ground/stone")));
+            boolean isRedstoneWire = event.getState().is(Blocks.REDSTONE_WIRE);
+            if (!isStoneOre && !isRedstoneWire) {
                 event.setCanceled(true);
             }
         }
