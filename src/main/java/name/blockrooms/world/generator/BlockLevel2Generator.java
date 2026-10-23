@@ -15,10 +15,12 @@ import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -30,25 +32,17 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.storage.loot.LootTable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * BlockLevel 2「隧道」——<b>结构化生成</b>版本。
+ * BlockLevel 2「隧道」——从 1.21.11 移植的模板化生成器。
  *
- * <p>世界 = <b>16×16×6 结构模板拼块</b>（每个区块一个模板，y=0..5）：
- * <ul>
- *   <li>模板（放在 {@code data/blockrooms/structure/}，需搭建）：{@code bl2_corridor_x}（东西走廊）、
- *       {@code bl2_corner}（东南拐角）、{@code bl2_tjunction}（西/东/南 T 字）、
- *       {@code bl2_crossroads}（十字）、{@code bl2_dead_end}（西口死路）；
- *       朝向由代码按 Rotation 0/90/180/270 覆盖；</li>
- *   <li>四边隧道口的开/闭由<b>边哈希</b>决定（每边约 70% 开口）：边以「西/北区块坐标 + 东/南方向」
- *       唯一标识，相邻区块读同一条边 → 开口状态必然一致，迷宫自动连通、不会错位；</li>
- *   <li>模板在 <b>FEATURES 阶段</b>（{@link #applyBiomeDecoration}，与结构同一阶段、同一写入路径）放置，
- *       随后 super 继续生成门结构（云杉门/石英门，覆盖在模板之上）；</li>
- *   <li>模板内的箱子/潜影盒由代码统一写入 {@code blockrooms:gameplay/blocklevel2} 战利品表。</li>
- * </ul>
- *
- * <p>旧版 fillFromNoise 逐块迷宫逻辑已废弃移除；spawnOriginalMobs 置空（模板自包含）。</p>
+ * <p>每个区块一个 16×16×6 模板（y=0..5），四边隧道口由共享边哈希决定开口（约 70%），
+ * 相邻区块读同一条边，迷宫自动连通；特殊区块用 heat machine / coffin / supplise / sensing 模板；
+ * 模板内的容器统一写入 {@code blockrooms:gameplay/blocklevel2} 战利品表，并按 1.21.11 的
+ * 装饰规则（铁块长条、红陶土长条、红石火把、潜影盒）补装饰。</p>
  */
 public class BlockLevel2Generator extends SimpleGenerator {
 
@@ -58,19 +52,24 @@ public class BlockLevel2Generator extends SimpleGenerator {
     public static final int INTERIOR_MIN_Y = 1;
     public static final int INTERIOR_MAX_Y = 3;
 
-    /** 模板尺寸：16×16×6（y=0..5，y=5 为基岩顶） */
     private static final int TPL_SIZE = 16;
     private static final int TPL_HEIGHT = 6;
 
-    /** 每边隧道口的开口概率 */
     private static final double EDGE_OPEN_CHANCE = 0.7;
 
-    /** 模板 id（用户搭建，data/blockrooms/structure/） */
     private static final Identifier TPL_CORRIDOR_X = Identifier.fromNamespaceAndPath(Blockrooms.MODID, "bl2_corridor_x");
     private static final Identifier TPL_CORNER = Identifier.fromNamespaceAndPath(Blockrooms.MODID, "bl2_corner");
     private static final Identifier TPL_TJUNCTION = Identifier.fromNamespaceAndPath(Blockrooms.MODID, "bl2_tjunction");
     private static final Identifier TPL_CROSSROADS = Identifier.fromNamespaceAndPath(Blockrooms.MODID, "bl2_crossroads");
     private static final Identifier TPL_DEAD_END = Identifier.fromNamespaceAndPath(Blockrooms.MODID, "bl2_deadend");
+
+    public static final Identifier TPL_HEAT_MACHINE = Identifier.fromNamespaceAndPath(Blockrooms.MODID, "bl2_heating_iron_block_machine");
+    public static final int HEAT_MACHINE_DENOM = 1024;
+    private static final Identifier[] SPECIAL_TEMPLATES = {
+            Identifier.fromNamespaceAndPath(Blockrooms.MODID, "bl2_coffin_room"),
+            Identifier.fromNamespaceAndPath(Blockrooms.MODID, "bl2_supplise_room"),
+            Identifier.fromNamespaceAndPath(Blockrooms.MODID, "bl2_sensing_room")
+    };
 
     public static final MapCodec<BlockLevel2Generator> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
@@ -79,7 +78,7 @@ public class BlockLevel2Generator extends SimpleGenerator {
     );
 
     public static final ResourceKey<LootTable> BLOCKLEVEL2_LOOT = ResourceKey.create(
-            Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(Blockrooms.MODID, "chests/blocklevel2"));
+            Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(Blockrooms.MODID, "gameplay/blocklevel2"));
 
     public BlockLevel2Generator(BiomeSource biomeSource) {
         super(biomeSource);
@@ -91,14 +90,144 @@ public class BlockLevel2Generator extends SimpleGenerator {
     }
 
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState random, StructureManager structureManager, ChunkAccess chunk) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunk) {
         return CompletableFuture.completedFuture(chunk);
     }
 
     @Override
     public void applyBiomeDecoration(WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager) {
         placeWorldTemplate(level, chunk);
+        placeDecorations(level, chunk);
         super.applyBiomeDecoration(level, chunk, structureManager);
+    }
+
+    private static final int CHEST_DENOM = 25;
+    private static final int IRON_DENOM = 40;
+    private static final int TERRACOTTA_DENOM = 15;
+    private static final int TORCH_DENOM = 8;
+    private static final int SHULKER_ON_IRON_DENOM = 3;
+    private static final int SPECIAL_ROOM_CHEST_DENOM = 24;
+
+    private static void placeDecorations(WorldGenLevel level, ChunkAccess chunk) {
+        long seed = level.getSeed();
+        ChunkPos cp = chunk.getPos();
+        if (isSpecialChunk(seed, cp.x(), cp.z())) {
+            return;
+        }
+        int minX = cp.getMinBlockX();
+        int minZ = cp.getMinBlockZ();
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                BlockPos p = new BlockPos(minX + x, INTERIOR_MIN_Y, minZ + z);
+                if (!level.getBlockState(p).isAir() || !level.getBlockState(p.below()).is(Blocks.SMOOTH_STONE)) {
+                    continue;
+                }
+                if (!wallAdjacent(level, p) || tunnelDir(level, p) == null) {
+                    continue;
+                }
+                long h = hash3(seed, p.getX(), p.getY(), p.getZ());
+                if (h % CHEST_DENOM == 0) {
+                    placeLootContainer(level, p, Blocks.CHEST.defaultBlockState(), seed ^ p.asLong());
+                } else if (h % IRON_DENOM == 5) {
+                    placeDecoRun(level, seed, p, Blocks.IRON_BLOCK);
+                } else if (h % TERRACOTTA_DENOM == 10) {
+                    placeDecoRun(level, seed, p, Blocks.DYED_TERRACOTTA.pick(DyeColor.RED));
+                } else if (h % TORCH_DENOM == 3) {
+                    Direction wallDir = wallDirection(level, p);
+                    if (wallDir != null && level.getBlockState(p.above()).isAir()) {
+                        level.setBlock(p.above(),
+                                Blocks.REDSTONE_WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, wallDir.getOpposite()),
+                                Block.UPDATE_NONE);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void placeDecoRun(WorldGenLevel level, long seed, BlockPos start, Block block) {
+        Direction dir = tunnelDir(level, start);
+        if (dir == null) {
+            return;
+        }
+        long h = hash3(seed, start.getX(), start.getY(), start.getZ());
+        int total = 3 + (int) (h % 2);
+        int forward = 1 + (int) ((h >>> 8) % (total - 1));
+        int backward = total - 1 - forward;
+        BlockPos tip = null;
+        for (int i = -backward; i <= forward; i++) {
+            BlockPos q = start.relative(dir, i);
+            if (!level.getBlockState(q).isAir()
+                    || !level.getBlockState(q.below()).is(Blocks.SMOOTH_STONE)
+                    || !wallAdjacent(level, q)
+                    || tunnelDir(level, q) == null) {
+                return;
+            }
+            tip = q;
+        }
+        for (int i = -backward; i <= forward; i++) {
+            level.setBlock(start.relative(dir, i), block.defaultBlockState(), Block.UPDATE_NONE);
+        }
+        if ((h & 1) == 0 && tip != null && level.getBlockState(tip.above()).isAir()) {
+            level.setBlock(tip.above(), block.defaultBlockState(), Block.UPDATE_NONE);
+        }
+        if (block == Blocks.IRON_BLOCK
+                && hash2(seed, start.getX(), start.getZ()) % SHULKER_ON_IRON_DENOM == 0
+                && level.getBlockState(start.above()).isAir()) {
+            placeLootContainer(level, start.above(), Blocks.SHULKER_BOX.defaultBlockState(), seed ^ start.above().asLong());
+        }
+    }
+
+    private static Direction tunnelDir(WorldGenLevel level, BlockPos p) {
+        List<Direction> dirs = new ArrayList<>(4);
+        for (Direction d : Direction.Plane.HORIZONTAL) {
+            if (level.getBlockState(p.relative(d)).isAir()
+                    && level.getBlockState(p.relative(d, 2)).isAir()) {
+                dirs.add(d);
+            }
+        }
+        if (dirs.isEmpty()) {
+            return null;
+        }
+        return dirs.get((int) Math.floorMod(p.asLong(), dirs.size()));
+    }
+
+    private static boolean isSpecialChunk(long seed, int chunkX, int chunkZ) {
+        return hashChunk(seed, chunkX, chunkZ) % 12 == 0;
+    }
+
+    private static boolean wallAdjacent(WorldGenLevel level, BlockPos p) {
+        return isStructureWall(level.getBlockState(p.north()))
+                || isStructureWall(level.getBlockState(p.south()))
+                || isStructureWall(level.getBlockState(p.east()))
+                || isStructureWall(level.getBlockState(p.west()));
+    }
+
+    private static boolean isStructureWall(BlockState state) {
+        return !state.isAir()
+                && !state.is(Blocks.IRON_BLOCK)
+                && !state.is(Blocks.DYED_TERRACOTTA.pick(DyeColor.RED))
+                && !state.is(Blocks.CHEST)
+                && !state.is(Blocks.SHULKER_BOX);
+    }
+
+    private static Direction wallDirection(WorldGenLevel level, BlockPos p) {
+        if (isStructureWall(level.getBlockState(p.north()))) return Direction.NORTH;
+        if (isStructureWall(level.getBlockState(p.south()))) return Direction.SOUTH;
+        if (isStructureWall(level.getBlockState(p.east()))) return Direction.EAST;
+        if (isStructureWall(level.getBlockState(p.west()))) return Direction.WEST;
+        return null;
+    }
+
+    private static long hash2(long seed, int x, int z) {
+        long h = seed ^ (x * 0x9E3779B97F4A7C15L) ^ (z * 0xBF58476D1CE4E5B9L) ^ 0x2B5E17L;
+        h = (h ^ (h >>> 33)) * 0x94D049BB133111EBL;
+        return (h ^ (h >>> 29)) & Long.MAX_VALUE;
+    }
+
+    private static long hash3(long seed, int x, int y, int z) {
+        long h = seed ^ (x * 0x9E3779B97F4A7C15L) ^ (y * 0xBF58476D1CE4E5B9L) ^ (z * 0x165667B19E3779F9L) ^ 0x3C6EF372L;
+        h = (h ^ (h >>> 33)) * 0x94D049BB133111EBL;
+        return (h ^ (h >>> 29)) & Long.MAX_VALUE;
     }
 
     private void placeWorldTemplate(WorldGenLevel level, ChunkAccess chunk) {
@@ -111,35 +240,43 @@ public class BlockLevel2Generator extends SimpleGenerator {
         boolean west = edgeOpen(seed, cp.x(), cp.z(), Direction.WEST);
 
         int count = (north ? 1 : 0) + (east ? 1 : 0) + (south ? 1 : 0) + (west ? 1 : 0);
+
         Identifier tpl;
         Rotation rotation = Rotation.NONE;
-        switch (count) {
-            case 4 -> tpl = TPL_CROSSROADS;
-            case 3 -> {
-                tpl = TPL_TJUNCTION;
-                rotation = Rotation.values()[missingSide(north, east, south, west)];
-            }
-            case 2 -> {
-                if (north && south) {
-                    tpl = TPL_CORRIDOR_X;
-                    rotation = Rotation.CLOCKWISE_90;
-                } else if (east && west) {
-                    tpl = TPL_CORRIDOR_X;
-                } else {
-                    // 拐角：模板基准为东南口（东=1、南=2），a 为两口中顺时针序靠前的一个
-                    tpl = TPL_CORNER;
-                    int a = north ? (east ? 0 : 3) : (east ? 1 : 2);
-                    rotation = Rotation.values()[Math.floorMod(a - 1, 4)];
+        boolean heatMachine = isHeatMachineChunk(seed, cp.x(), cp.z());
+        boolean special = !heatMachine && hashChunk(seed, cp.x(), cp.z()) % 12 == 0;
+        if (heatMachine) {
+            tpl = TPL_HEAT_MACHINE;
+        } else if (special) {
+            tpl = SPECIAL_TEMPLATES[(int) ((hashChunk(seed, cp.x(), cp.z()) >>> 8) % SPECIAL_TEMPLATES.length)];
+        } else {
+            switch (count) {
+                case 4 -> tpl = TPL_CROSSROADS;
+                case 3 -> {
+                    tpl = TPL_TJUNCTION;
+                    rotation = Rotation.values()[missingSide(north, east, south, west)];
                 }
-            }
-            case 1 -> {
-                tpl = TPL_DEAD_END;
-                rotation = Rotation.values()[Math.floorMod(singleSide(north, east, south, west) - 3, 4)];
-            }
-            default -> {
-                tpl = TPL_DEAD_END;
-                int d = Math.floorMod(hashChunk(seed, cp.x(), cp.z()), 4);
-                rotation = Rotation.values()[Math.floorMod(d - 3, 4)];
+                case 2 -> {
+                    if (north && south) {
+                        tpl = TPL_CORRIDOR_X;
+                        rotation = Rotation.CLOCKWISE_90;
+                    } else if (east && west) {
+                        tpl = TPL_CORRIDOR_X;
+                    } else {
+                        tpl = TPL_CORNER;
+                        int a = north ? (east ? 0 : 3) : (east ? 1 : 2);
+                        rotation = Rotation.values()[Math.floorMod(a - 1, 4)];
+                    }
+                }
+                case 1 -> {
+                    tpl = TPL_DEAD_END;
+                    rotation = Rotation.values()[Math.floorMod(singleSide(north, east, south, west) - 3, 4)];
+                }
+                default -> {
+                    tpl = TPL_DEAD_END;
+                    int d = Math.floorMod(hashChunk(seed, cp.x(), cp.z()), 4);
+                    rotation = Rotation.values()[Math.floorMod(d - 3, 4)];
+                }
             }
         }
 
@@ -147,11 +284,11 @@ public class BlockLevel2Generator extends SimpleGenerator {
         try {
             template = level.getLevel().getServer().getStructureManager().get(tpl).orElse(null);
         } catch (Exception e) {
-            Blockrooms.LOGGER.error("BL2-TPL: chunk {} failed to load template {}: {}", cp, tpl, e.toString());            template = null;
+            Blockrooms.LOGGER.error("BL2-TPL: chunk {} failed to load template {}: {}", cp, tpl, e.toString());
+            template = null;
         }
         BlockPos origin = new BlockPos(cp.getMinBlockX(), 0, cp.getMinBlockZ());
         if (template == null) {
-            // 模板缺失（尚未搭建/文件名不符）：实心石砖保底，避免玩家掉进虚空
             Blockrooms.LOGGER.warn("BL2-TPL: chunk {} template {} not found -> solid fallback", cp, tpl);
             fillFallback(chunk);
             return;
@@ -163,15 +300,9 @@ public class BlockLevel2Generator extends SimpleGenerator {
             Blockrooms.LOGGER.error("BL2-TPL: chunk {} template {} placement failed", cp, tpl, e);
             fillFallback(chunk);
         }
-        applyLoot(level, origin);
+        applyLoot(level, origin, special);
     }
 
-    /**
-     * 放置模板：placeInWorld 的旋转绕世界原点 (0,0,0)，旋转后模板坐标变负、整体偏移到
-     * 相邻区块。这里按旋转方向补偿 offset（+15），使旋转后的 16×16 区域仍精确覆盖
-     * [origin, origin+15]；方块状态旋转、方块实体、空气清理由 placeInWorld 统一处理。
-     * 返回放置的方块数（placeInWorld 返回值）。
-     */
     private static int placeTemplateRotated(WorldGenLevel level, StructureTemplate template, BlockPos origin, Rotation rotation) {
         BlockPos offset = switch (rotation) {
             case CLOCKWISE_90 -> origin.offset(15, 0, 0);
@@ -184,10 +315,6 @@ public class BlockLevel2Generator extends SimpleGenerator {
         return placed ? 1 : 0;
     }
 
-    /**
-     * 边开口：边由「西/北区块坐标 + 东/南方向」唯一标识——本区块的西边 = 西邻区块的东边，
-     * 北边 = 北邻区块的南边，两侧区块读同一条边 → 开口状态一致。
-     */
     private static boolean edgeOpen(long seed, int chunkX, int chunkZ, Direction dir) {
         int ex = chunkX;
         int ez = chunkZ;
@@ -224,33 +351,46 @@ public class BlockLevel2Generator extends SimpleGenerator {
         return h ^ (h >>> 29);
     }
 
-    /** 模板内的箱子/潜影盒统一写入 BL2 战利品表；空隧道列按哈希小概率补生成物资容器 */
-    private static void applyLoot(WorldGenLevel level, BlockPos origin) {
+    public static boolean isHeatMachineChunk(long seed, int chunkX, int chunkZ) {
+        long h = hashChunk(seed, chunkX, chunkZ);
+        return (h & Long.MAX_VALUE) % HEAT_MACHINE_DENOM == 0;
+    }
+
+    public static BlockPos heatMachineCenter(int chunkX, int chunkZ) {
+        return new BlockPos(chunkX * 16 + 8, 0, chunkZ * 16 + 8);
+    }
+
+    private static void applyLoot(WorldGenLevel level, BlockPos origin, boolean special) {
         long seed = level.getSeed();
         for (int x = 0; x < TPL_SIZE; x++) {
             for (int z = 0; z < TPL_SIZE; z++) {
                 BlockPos p = origin.offset(x, INTERIOR_MIN_Y, z);
                 if (level.getBlockEntity(p) instanceof RandomizableContainerBlockEntity container) {
-                    // 模板自带的容器：写入战利品表
                     container.setLootTable(BLOCKLEVEL2_LOOT);
                     container.setLootTableSeed(seed ^ p.asLong());
+                }
+            }
+        }
+        if (special) {
+            fillSpecialRoomLoot(level, origin);
+        }
+    }
+
+    private static void fillSpecialRoomLoot(WorldGenLevel level, BlockPos origin) {
+        long seed = level.getSeed();
+        for (int x = 0; x < 12; x++) {
+            for (int z = 0; z < 12; z++) {
+                BlockPos p = origin.offset(x, INTERIOR_MIN_Y, z);
+                if (!level.getBlockState(p).isAir()) {
                     continue;
                 }
-                // 兜底：空隧道列（y=1 空气、y=0 石砖地面）小概率生成箱子/潜影盒
-                if (level.getBlockState(p).isAir()
-                        && level.getBlockState(p.below()).is(Blocks.STONE_BRICKS)) {
-                    long h = seed ^ (p.getX() * 0x9E3779B97F4A7C15L) ^ (p.getZ() * 0xBF58476D1CE4E5B9L);
-                    h = (h ^ (h >>> 33)) * 0x94D049BB133111EBL;
-                    int roll = (int) ((h ^ (h >>> 29)) & 0xFF);
-                    BlockState state = null;
-                    if (roll < 6) {
-                        state = Blocks.CHEST.defaultBlockState();
-                    } else if (roll < 8) {
-                        state = Blocks.SHULKER_BOX.defaultBlockState();
-                    }
-                    if (state != null) {
-                        placeLootContainer(level, p, state, seed ^ p.asLong());
-                    }
+                if (!level.getBlockState(p.below()).is(Blocks.SMOOTH_STONE)
+                        && !level.getBlockState(p.below()).is(Blocks.STONE_BRICKS)) {
+                    continue;
+                }
+                long h = hash3(seed, p.getX(), p.getY(), p.getZ());
+                if (h % SPECIAL_ROOM_CHEST_DENOM == 0) {
+                    placeLootContainer(level, p, Blocks.CHEST.defaultBlockState(), seed ^ p.asLong());
                 }
             }
         }
@@ -267,7 +407,6 @@ public class BlockLevel2Generator extends SimpleGenerator {
         }
     }
 
-    /** 模板缺失时的保底：y=0..4 石砖 + y=5 基岩 */
     private static void fillFallback(ChunkAccess chunk) {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
@@ -290,7 +429,6 @@ public class BlockLevel2Generator extends SimpleGenerator {
 
     @Override
     public void spawnOriginalMobs(WorldGenRegion level) {
-        // 结构模板自包含（含箱子/装饰）；此阶段无需额外生成
     }
 
     @Override
