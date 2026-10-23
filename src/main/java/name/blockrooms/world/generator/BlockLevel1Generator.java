@@ -114,6 +114,7 @@ public class BlockLevel1Generator extends SimpleGenerator {
     private static final Identifier TPL_CORRIDOR_SPRUCE = id("bl1_quartz_corridor_spruce");
     private static final Identifier TPL_CORRIDOR_IRON = id("bl1_quartz_corridor_iron");
     private static final Identifier TPL_GALLERY = id("bl1_calcite_gallery");
+    private static final Identifier TPL_CAMP = id("bl1_abandoned_camp");
     private static final Identifier TPL_UNMANNED = id("bl1_unmanned_quartz_base");
     private static final Identifier TPL_ELEVATOR = id("bl1_elevator_room");
     private static final Identifier TPL_EXIT = id("bl1_concrete_corridor");
@@ -122,7 +123,7 @@ public class BlockLevel1Generator extends SimpleGenerator {
     private static final Identifier[] LOBBY_16 = {TPL_LOBBY_PILLAR, TPL_LOBBY_FOUNTAIN, TPL_LOBBY_LIBRARY, TPL_PLANT_ROOM};
     private static final Identifier[] LOBBY_32 = {TPL_LOBBY_PILLAR_32, TPL_LOBBY_ARMOR_STAND_32, TPL_LOBBY_EMPTY_32};
     private static final Identifier[] CORRIDOR = {TPL_CORRIDOR_SPRUCE, TPL_CORRIDOR_IRON};
-    private static final Identifier[] VAULT = {TPL_UNMANNED};
+    private static final Identifier[] VAULT = {TPL_CAMP, TPL_UNMANNED};
 
     public enum RoomType { LOBBY, VAULT, CORRIDOR, GALLERY, EXIT }
 
@@ -487,9 +488,10 @@ public class BlockLevel1Generator extends SimpleGenerator {
                 // 朝向由四邻开口情况决定（见 pickRotation），避免"门对墙"死路。
                 Rotation rotation = Rotation.NONE;
                 boolean twoWay = type == RoomType.CORRIDOR || type == RoomType.GALLERY
+                        || (type == RoomType.VAULT && tpl.equals(TPL_CAMP))
                         || (type == RoomType.LOBBY && tpl.equals(TPL_PLANT_ROOM));
                 if (twoWay) {
-                    boolean naturalX = true;
+                    boolean naturalX = !tpl.equals(TPL_CAMP);
                     rotation = pickRotation(seed, floor, cp.x(), cp.z(), type, naturalX);
                 }
                 BlockPos origin = new BlockPos(cp.getMinBlockX(), baseY, cp.getMinBlockZ());
