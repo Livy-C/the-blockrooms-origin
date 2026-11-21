@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "blockrooms:copper"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "blockrooms:copper"
+      }
+    ]
+  }
+}
