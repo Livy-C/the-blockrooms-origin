@@ -13,5 +13,6 @@ public class ModNetwork {
         final PayloadRegistrar registrar = event.registrar("1");
         registrar.playToServer(NoclipPayload.TYPE, NoclipPayload.STREAM_CODEC, NoclipPayload::handleServer);
         registrar.playToServer(ElevatorTeleportPayload.TYPE, ElevatorTeleportPayload.STREAM_CODEC, ElevatorTeleportPayload::handleServer);
+        registrar.playToClient(TemperaturePayload.TYPE, TemperaturePayload.STREAM_CODEC, TemperaturePayload::handle);
     }
 }

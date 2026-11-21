@@ -39,6 +39,11 @@ public class ModCreativeModeTabs {
                         output.accept(ModItems.STICK_BUNDLE);
                         output.accept(ModItems.BLOOD_ZOMBIE_SPAWN_EGG);
                         output.accept(ModItems.BLACKSTONE_SHULKER_SPAWN_EGG);
+                        output.accept(ModItems.TEMPERATURE_SENSOR);
+                        output.accept(ModItems.HEAT_INSULATION_HELMET);
+                        output.accept(ModItems.HEAT_INSULATION_CHESTPLATE);
+                        output.accept(ModItems.HEAT_INSULATION_LEGGINGS);
+                        output.accept(ModItems.HEAT_INSULATION_BOOTS);
                     })
                     .build());
     public static void register(IEventBus eventBus) {

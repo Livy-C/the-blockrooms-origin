@@ -366,10 +366,6 @@ public class BlockLevel1Generator extends SimpleGenerator {
         }
     }
 
-    /**
-     * 手工放置一个模板：只写落在当前区块内的方块（避免跨区块写入导致的 Stage 冲突），
-     * 方块实体 NBT 无条件加载（空容器补 room loot），实体按模板 NBT 生成。
-     */
     private void placeTemplateLocal(WorldGenLevel level, ChunkAccess chunk, Identifier tplId,
                                     BlockPos origin, Rotation rotation) {
         StructureTemplate tpl = loadTemplate(level, tplId);

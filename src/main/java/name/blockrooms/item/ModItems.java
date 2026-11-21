@@ -17,6 +17,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.consume_effects.ClearAllStatusEffectsConsumeEffect;
@@ -113,6 +114,22 @@ public class ModItems {
             ITEMS.registerSimpleBlockItem("teleporter_block", ModBlocks.TELEPORTER_BLOCK);
     public static final DeferredItem<BlockItem> FALLABLE_STONE =
             ITEMS.registerSimpleBlockItem("fallable_stone", ModBlocks.FALLABLE_STONE);
+
+    public static final DeferredItem<Item> TEMPERATURE_SENSOR =
+            ITEMS.registerItem("temperature_sensor", TemperatureSensorItem::new, properties -> properties);
+
+    public static final DeferredItem<Item> HEAT_INSULATION_HELMET =
+            ITEMS.registerSimpleItem("heat_insulation_helmet",
+                    properties -> properties.humanoidArmor(ModArmorMaterials.HEAT_INSULATION, ArmorType.HELMET));
+    public static final DeferredItem<Item> HEAT_INSULATION_CHESTPLATE =
+            ITEMS.registerSimpleItem("heat_insulation_chestplate",
+                    properties -> properties.humanoidArmor(ModArmorMaterials.HEAT_INSULATION, ArmorType.CHESTPLATE));
+    public static final DeferredItem<Item> HEAT_INSULATION_LEGGINGS =
+            ITEMS.registerSimpleItem("heat_insulation_leggings",
+                    properties -> properties.humanoidArmor(ModArmorMaterials.HEAT_INSULATION, ArmorType.LEGGINGS));
+    public static final DeferredItem<Item> HEAT_INSULATION_BOOTS =
+            ITEMS.registerSimpleItem("heat_insulation_boots",
+                    properties -> properties.humanoidArmor(ModArmorMaterials.HEAT_INSULATION, ArmorType.BOOTS));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

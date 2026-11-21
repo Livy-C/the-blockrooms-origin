@@ -1,0 +1,6 @@
+{
+    "model": {
+        "type": "minecraft:model",
+        "model": "blockrooms:item/heat_insulation_boots"
+    }
+}
